@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cyber-Scrapper: GOLD MASTER V10</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="scanlines"></div>
+
+    <div id="start-screen">
+        <h1 class="title-main">CYBER<br>SCRAPPER</h1>
+        <p class="subtitle-main">GOLD MASTER V10</p>
+        <button class="btn-start" id="btn-start">CONNECT SYSTEM</button>
+    </div>
+
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div class="rank-text">RANK: <span id="rank-name">SCRAPPER</span> (XP: <span id="xp-val">0</span>%)</div>
+            <div class="rank-bar-container">
+                <div class="rank-bar-fill" id="xp-bar"></div>
+            </div>
+
+            <div class="top-row">
+                <div class="credits-box" id="credits-container">
+                    <i class="fas fa-gem"></i>
+                    <span id="score">0</span>
+                </div>
+
+                <div class="shop-column">
+                    <div class="shop-btn" id="btn-upgrade-tool">
+                        <div class="shop-sub">LVL <span id="lvl-tool">1</span></div>
+                        <div class="shop-title">LASER INTENSITY</div>
+                        <div class="shop-cost" id="cost-tool">150</div>
+                    </div>
+                    <div class="shop-btn" id="btn-upgrade-drone">
+                        <div class="shop-sub">LVL <span id="lvl-drone">0</span></div>
+                        <div class="shop-title" style="color:#00ff00;">AUTO-DRONE</div>
+                        <div class="shop-cost" id="cost-drone">500</div>
+                    </div>
+                    <div class="shop-btn" id="btn-upgrade-value">
+                        <div class="shop-sub">LVL <span id="lvl-value">1</span></div>
+                        <div class="shop-title" style="color:#ff0055;">MARKET VALUE</div>
+                        <div class="shop-cost" id="cost-value">300</div>
+                    </div>
+                    <div class="shop-btn" id="btn-ads" style="border-color: #ffff00;">
+                        <div class="shop-sub">NETWORK</div>
+                        <div class="shop-title" style="color:#ffff00;">DATA BROKER</div>
+                        <div class="shop-cost">FREE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="combo-display" id="combo-box">
+            <div class="combo-val" id="combo-val">x1.0</div>
+        </div>
+
+        <div class="glitch-warning" id="glitch-msg">⚠️ SYSTEM CORRUPTION ⚠️</div>
+        <div class="boss-warning" id="boss-msg">⚠️ GIANT ARTIFACT DETECTED ⚠️</div>
+
+        <div class="nova-bar-bg">
+            <div class="nova-bar-fill" id="nova-bar"></div>
+        </div>
+        <div id="nova-container">
+            <div id="nova-btn"><i class="fas fa-radiation"></i></div>
+        </div>
+
+        <!-- Prestige Button (Hidden by default) -->
+        <div id="prestige-container"
+            style="display:none; position:absolute; top:50%; left:20px; transform:translateY(-50%); pointer-events:auto;">
+            <button class="btn-prestige" id="btn-prestige">
+                <div style="font-size:0.8rem;">MAX RANK REACHED</div>
+                <div>HARD RESET</div>
+                <div style="font-size:0.8rem; color:#ffd700;">x2 MULTIPLIER</div>
+            </button>
+        </div>
+
+        <div class="hud-bottom">
+            <div class="prog-text" id="prog-text">INTEGRITY: 0%</div>
+            <div class="prog-track">
+                <div class="prog-fill" id="prog-bar"></div>
+            </div>
+            <button id="action-btn">VENDRE <span id="sell-val"></span></button>
+        </div>
+    </div>
+
+    <!-- AD NETWORK UI -->
+    <div id="ad-modal-overlay">
+        <div id="ad-modal">
+            <div class="ad-close" id="ad-close">&times;</div>
+            <div class="ad-header">DATA BROKER NETWORK</div>
+            <div class="ad-list" id="ad-list">
+                <!-- Ads injected here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="ad-timer-overlay">
+        <div class="ad-timer-text">DOWNLOADING DATA...</div>
+        <div class="ad-timer-bar">
+            <div class="ad-timer-fill" id="ad-timer-fill"></div>
+        </div>
+    </div>
+
+    <div id="game-container"></div>
+
+    <script type="module" src="/src/core/Game.js"></script>
+</body>
+
+</html>

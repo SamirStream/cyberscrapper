@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Cyber-Scrapper: HYPER-EVOLUTION V9</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+
+        body {
+            margin: 0; overflow: hidden; background-color: #000;
+            font-family: 'Orbitron', sans-serif; color: #0ff;
+            user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+
+        #game-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+            background: radial-gradient(circle at center, #0b0b1a 0%, #000 90%);
+        }
+
+        /* UI LAYER */
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+            pointer-events: none; display: flex; flex-direction: column;
+            justify-content: space-between; padding: 15px; box-sizing: border-box;
+        }
+
+        /* TOP HUD */
+        .hud-top { width: 100%; }
+        
+        .rank-bar-container {
+            width: 100%; height: 6px; background: #111; margin-bottom: 10px;
+            position: relative; border-radius: 3px; overflow: hidden;
+        }
+        .rank-bar-fill {
+            height: 100%; width: 0%; background: #ffd700;
+            box-shadow: 0 0 10px #ffd700; transition: width 0.5s ease-out;
+        }
+        .rank-text { font-size: 0.8rem; color: #ffd700; font-family: 'Rajdhani'; letter-spacing: 2px; text-align: center; margin-bottom: 5px; text-shadow: 0 0 5px #ffd700; }
+
+        .top-row { display: flex; justify-content: space-between; align-items: flex-start; }
+
+        .credits-box {
+            background: rgba(0, 0, 0, 0.9); border-left: 4px solid #ff0055;
+            padding: 10px 20px; font-size: 2.2rem; font-weight: 900;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 5px 5px 0px rgba(255, 0, 85, 0.2);
+            text-shadow: 0 0 15px #ff0055; clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+            transition: transform 0.1s;
+        }
+
+        .shop-column { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+        .shop-btn {
+            pointer-events: auto; background: rgba(10, 10, 15, 0.95);
+            border: 1px solid #333; border-right: 3px solid #ffd700;
+            color: #fff; padding: 10px 15px; width: 190px; text-align: right;
+            cursor: pointer; font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+            transition: all 0.1s ease-out; position: relative; overflow: hidden;
+        }
+        .shop-btn:active { transform: scale(0.95); background: #333; }
+        
+        /* CENTER */
+        .combo-display {
+            position: absolute; top: 18%; left: 50%; transform: translateX(-50%);
+            text-align: center; opacity: 0; transition: opacity 0.1s; pointer-events: none;
+        }
+        .combo-val { font-size: 5rem; font-weight: 900; color: #fff; font-style: italic; text-shadow: 5px 5px 0px #ff0055, -2px -2px 0 #00ffff; }
+        
+        .glitch-warning {
+            position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
+            color: #ff0000; font-size: 2rem; font-weight: 900; letter-spacing: 5px;
+            text-shadow: 0 0 10px red; display: none; animation: glitchText 0.2s infinite;
+        }
+        @keyframes glitchText { 0% { transform:translate(-52%, 2px); } 50% { transform:translate(-48%, -2px); } 100% { transform:translate(-50%, 0); } }
+
+        /* NOVA BUTTON (ULTIMATE) */
+        #nova-container {
+            position: absolute; bottom: 120px; right: 20px;
+            width: 80px; height: 80px; display: none; pointer-events: auto;
+            cursor: pointer;
+        }
+        #nova-btn {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: radial-gradient(#fff, #00ffff);
+            box-shadow: 0 0 30px #00ffff;
+            animation: pulseNova 0.5s infinite alternate;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2rem; color: #000; border: 2px solid #fff;
+        }
+        @keyframes pulseNova { from { transform: scale(1); box-shadow: 0 0 20px #00ffff; } to { transform: scale(1.1); box-shadow: 0 0 50px #00ffff; } }
+        
+        .nova-bar-bg {
+            position: absolute; bottom: 110px; right: 20px; width: 80px; height: 10px;
+            background: #222; border: 1px solid #555; border-radius: 5px; overflow: hidden;
+        }
+        .nova-bar-fill { height: 100%; width: 0%; background: #00ffff; transition: width 0.2s; }
+
+        /* HUD BOTTOM */
+        .hud-bottom { width: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: 30px; }
+        .prog-track { width: 100%; max-width: 500px; height: 10px; background: #111; border: 1px solid #333; position: relative; margin-bottom: 10px; border-radius: 5px; overflow: hidden; }
+        .prog-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #00ffff, #ff0055); box-shadow: 0 0 20px #00ffff; transition: width 0.05s linear; }
+        
+        #action-btn {
+            pointer-events: auto; background: #fff; color: #000; border: none;
+            padding: 25px 0; width: 320px; font-family: 'Orbitron'; font-size: 2rem; font-weight: 900;
+            text-transform: uppercase; cursor: pointer;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            display: none; animation: pulseBtn 0.15s infinite alternate;
+            box-shadow: 0 0 50px #00ffff;
+        }
+        @keyframes pulseBtn { from { transform: scale(1); box-shadow: 0 0 30px #00ffff; } to { transform: scale(1.03); box-shadow: 0 0 60px #ff0055; } }
+
+        /* VISUAL FX */
+        .floating-txt {
+            position: absolute; font-weight: 900; font-size: 1.5rem; pointer-events: none;
+            animation: floatUp 0.8s forwards; z-index: 100; text-shadow: -2px 2px 0 #000; white-space: nowrap;
+        }
+        @keyframes floatUp { 0% { transform:translate(-50%, 0) scale(0.5); opacity:1; } 100% { transform:translate(-50%, -150px) scale(1.2); opacity:0; } }
+
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.2) 50%);
+            background-size: 100% 4px; pointer-events: none; z-index: 99; opacity: 0.3;
+        }
+
+        #start-screen {
+            position: fixed; top:0; left:0; width:100%; height:100%; background: #050505; z-index: 200;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background-image: radial-gradient(#1a1a40 1px, transparent 1px); background-size: 30px 30px;
+        }
+        .btn-start {
+            background: transparent; border: 2px solid #ff0055; color: #ff0055; padding: 20px 60px;
+            font-family: 'Orbitron'; font-size: 1.5rem; cursor: pointer; transition: 0.3s; font-weight: bold;
+            box-shadow: 0 0 20px rgba(255,0,85,0.2);
+        }
+        .btn-start:hover { background: #ff0055; color: #fff; box-shadow: 0 0 60px #ff0055; }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <div id="start-screen">
+        <h1 style="font-size: 4rem; color: #fff; text-shadow: 4px 4px 0 #ff0055; margin-bottom:0; line-height:0.9; text-align:center;">CYBER<br>SCRAPPER</h1>
+        <p style="color:#00ffff; letter-spacing:6px; margin-bottom:50px; font-weight:bold;">HYPER-EVOLUTION V9</p>
+        <button class="btn-start" onclick="window.startGame()">CONNECT SYSTEM</button>
+    </div>
+
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div class="rank-text">RANK: <span id="rank-name">SCRAPPER</span> (XP: <span id="xp-val">0</span>%)</div>
+            <div class="rank-bar-container"><div class="rank-bar-fill" id="xp-bar"></div></div>
+
+            <div class="top-row">
+                <div class="credits-box" id="credits-container">
+                    <i class="fas fa-gem"></i>
+                    <span id="score">0</span>
+                </div>
+                
+                <div class="shop-column">
+                    <div class="shop-btn" id="btn-upgrade-tool">
+                        <div style="font-size:0.7rem; color:#888;">LVL <span id="lvl-tool">1</span></div>
+                        <div style="font-weight:bold; color:#00ffff;">LASER INTENSITY</div>
+                        <div style="font-size:0.9rem; color:#ffd700;" id="cost-tool">150</div>
+                    </div>
+                    <div class="shop-btn" id="btn-upgrade-drone">
+                        <div style="font-size:0.7rem; color:#888;">LVL <span id="lvl-drone">0</span></div>
+                        <div style="font-weight:bold; color:#00ff00;">AUTO-DRONE</div>
+                        <div style="font-size:0.9rem; color:#ffd700;" id="cost-drone">500</div>
+                    </div>
+                    <div class="shop-btn" id="btn-upgrade-value">
+                        <div style="font-size:0.7rem; color:#888;">LVL <span id="lvl-value">1</span></div>
+                        <div style="font-weight:bold; color:#ff0055;">MARKET VALUE</div>
+                        <div style="font-size:0.9rem; color:#ffd700;" id="cost-value">300</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="combo-display" id="combo-box">
+            <div class="combo-val" id="combo-val">x1.0</div>
+        </div>
+
+        <div class="glitch-warning" id="glitch-msg">⚠️ SYSTEM CORRUPTION ⚠️</div>
+
+        <div class="nova-bar-bg"><div class="nova-bar-fill" id="nova-bar"></div></div>
+        <div id="nova-container">
+            <div id="nova-btn"><i class="fas fa-radiation"></i></div>
+        </div>
+
+        <div class="hud-bottom">
+            <div class="prog-text" id="prog-text">INTEGRITY: 0%</div>
+            <div class="prog-track"><div class="prog-fill" id="prog-bar"></div></div>
+            <button id="action-btn">VENDRE <span id="sell-val"></span></button>
+        </div>
+    </div>
+
+    <div id="game-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+        // --- CONFIGURATION ---
+        const CONFIG = {
+            baseBrushSize: 0.15,
+            baseValue: 250,
+            cleanThreshold: 99.8,
+            ranks: [
+                { name: "NOVICE", max: 1000 },
+                { name: "HUNTER", max: 5000 },
+                { name: "SPECIALIST", max: 15000 },
+                { name: "DATA LORD", max: 50000 },
+                { name: "SINGULARITY", max: 1000000 }
+            ]
+        };
+
+        // --- SHADERS (Chromatic Aberration) ---
+        const RGBShiftShader = {
+            uniforms: {
+                'tDiffuse': { value: null },
+                'amount': { value: 0.005 },
+                'angle': { value: 0.0 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+                }`,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float amount;
+                uniform float angle;
+                varying vec2 vUv;
+                void main() {
+                    vec2 offset = amount * vec2( cos(angle), sin(angle));
+                    vec4 cr = texture2D(tDiffuse, vUv + offset);
+                    vec4 cga = texture2D(tDiffuse, vUv);
+                    vec4 cb = texture2D(tDiffuse, vUv - offset);
+                    gl_FragColor = vec4(cr.r, cga.g, cb.b, cga.a);
+                }`
+        };
+
+        function loadData() {
+            const s = localStorage.getItem('cyberScrapperV9');
+            return s ? JSON.parse(s) : { 
+                credits: 0, xp: 0, rankIdx: 0, 
+                toolLevel: 1, valueLevel: 1, droneLevel: 0,
+                toolCost: 150, valueCost: 300, droneCost: 500 
+            };
+        }
+        function saveData() {
+            localStorage.setItem('cyberScrapperV9', JSON.stringify({
+                credits: gameState.credits, xp: gameState.xp, rankIdx: gameState.rankIdx,
+                toolLevel: gameState.toolLevel, valueLevel: gameState.valueLevel, droneLevel: gameState.droneLevel,
+                toolCost: gameState.toolCost, valueCost: gameState.valueCost, droneCost: gameState.droneCost
+            }));
+        }
+
+        let gameState = {
+            ...loadData(),
+            cleanedPercentage: 0,
+            isComplete: false,
+            currentArtifact: { value: 0, rarity: 'COMMON', isGlitch: false },
+            combo: 1.0,
+            lastCleanTime: 0,
+            shake: 0,
+            hasStarted: false,
+            novaCharge: 0,
+            nodes: []
+        };
+
+        // --- AUDIO ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.25;
+        masterGain.connect(audioCtx.destination);
+        
+        let cleanNode, humNode;
+
+        function initAudio() {
+            const b = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+            const d = b.getChannelData(0);
+            for(let i=0; i<d.length; i++) d[i] = Math.random() * 2 - 1;
+            
+            cleanNode = { src: audioCtx.createBufferSource(), gain: audioCtx.createGain(), filter: audioCtx.createBiquadFilter() };
+            cleanNode.src.buffer = b; cleanNode.src.loop = true; cleanNode.filter.frequency.value = 800; cleanNode.gain.gain.value = 0;
+            cleanNode.src.connect(cleanNode.filter); cleanNode.filter.connect(cleanNode.gain); cleanNode.gain.connect(masterGain);
+            cleanNode.src.start();
+
+            humNode = { osc: audioCtx.createOscillator(), gain: audioCtx.createGain() };
+            humNode.osc.type = 'sawtooth'; humNode.osc.frequency.value = 60; humNode.gain.gain.value = 0;
+            humNode.osc.connect(humNode.gain); humNode.gain.connect(masterGain);
+            humNode.osc.start();
+        }
+
+        function setSound(active, intensity) {
+            if(!cleanNode) return;
+            const t = audioCtx.currentTime;
+            if(active) {
+                const pitch = 1000 + (gameState.cleanedPercentage * 60) + (gameState.combo * 500);
+                cleanNode.gain.gain.setTargetAtTime(0.8, t, 0.1);
+                cleanNode.filter.frequency.setTargetAtTime(pitch, t, 0.1);
+                humNode.gain.gain.setTargetAtTime(0.2, t, 0.1);
+                humNode.osc.frequency.setTargetAtTime(60 + (intensity*50), t, 0.1);
+            } else {
+                cleanNode.gain.gain.setTargetAtTime(0, t, 0.1);
+                humNode.gain.gain.setTargetAtTime(0, t, 0.1);
+            }
+        }
+
+        function sfx(type) {
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+            osc.connect(g); g.connect(masterGain);
+
+            if(type === 'nova') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(50, t); osc.frequency.exponentialRampToValueAtTime(1000, t+0.5);
+                g.gain.setValueAtTime(1, t); g.gain.exponentialRampToValueAtTime(0.01, t+1.0);
+                osc.start(t); osc.stop(t+1.0);
+            } else if(type === 'coin') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(1200, t); osc.frequency.exponentialRampToValueAtTime(3000, t+0.1);
+                g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.01, t+0.3);
+                osc.start(t); osc.stop(t+0.3);
+            } else if (type === 'drone') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(800, t);
+                g.gain.setValueAtTime(0.05, t); g.gain.linearRampToValueAtTime(0, t+0.1);
+                osc.start(t); osc.stop(t+0.1);
+            } else if (type === 'win') {
+                [523, 659, 784, 1046].forEach((f, i) => {
+                    const o = audioCtx.createOscillator(); const gl = audioCtx.createGain();
+                    o.connect(gl); gl.connect(masterGain); o.type = 'triangle'; o.frequency.value = f;
+                    gl.gain.setValueAtTime(0.1, t+i*0.1); gl.gain.exponentialRampToValueAtTime(0.001, t+1.5);
+                    o.start(t+i*0.1); o.stop(t+1.5);
+                });
+            }
+        }
+
+        // --- THREE.JS ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+        camera.position.set(0, 1.8, 4.5); camera.lookAt(0,0,0);
+        
+        const renderer = new THREE.WebGLRenderer({antialias:false, alpha:true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        document.getElementById('game-container').appendChild(renderer.domElement);
+
+        const composer = new EffectComposer(renderer);
+        const renderPass = new RenderPass(scene, camera);
+        composer.addPass(renderPass);
+        
+        const bloom = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloom.threshold = 0; bloom.strength = 1.2; bloom.radius = 0.5;
+        composer.addPass(bloom);
+
+        const rgbShift = new ShaderPass(RGBShiftShader);
+        rgbShift.uniforms['amount'].value = 0.0;
+        composer.addPass(rgbShift);
+
+        scene.add(new THREE.AmbientLight(0x444444, 4));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2); dirLight.position.set(5, 10, 5); scene.add(dirLight);
+        const rimLight = new THREE.PointLight(0x00ffff, 3, 10); rimLight.position.set(-4, 2, -2); scene.add(rimLight);
+
+        // Grid
+        const grid = new THREE.Group();
+        const gridMat = new THREE.LineBasicMaterial({color:0xff0055, transparent:true, opacity:0.15});
+        for(let i=-30; i<=30; i+=3) {
+            let pts=[]; pts.push(new THREE.Vector3(i,-4,-50)); pts.push(new THREE.Vector3(i,-4,30));
+            let g=new THREE.BufferGeometry().setFromPoints(pts); grid.add(new THREE.Line(g, gridMat));
+            pts=[]; pts.push(new THREE.Vector3(-30,-4,i)); pts.push(new THREE.Vector3(30,-4,i));
+            g=new THREE.BufferGeometry().setFromPoints(pts); 
+            let l=new THREE.Line(g, gridMat); l.userData={z:i}; grid.add(l);
+        }
+        scene.add(grid);
+
+        // --- DRONE SYSTEM ---
+        class DroneSystem {
+            constructor() {
+                this.drones = [];
+                this.raycaster = new THREE.Raycaster();
+                this.lastShot = 0;
+            }
+
+            spawn(count) {
+                // Clear old
+                this.drones.forEach(d => scene.remove(d.mesh));
+                this.drones = [];
+                
+                const geo = new THREE.ConeGeometry(0.1, 0.2, 4);
+                const mat = new THREE.MeshBasicMaterial({color: 0x00ff00});
+
+                for(let i=0; i<count; i++) {
+                    const mesh = new THREE.Mesh(geo, mat);
+                    mesh.rotation.x = Math.PI/2;
+                    const group = new THREE.Group();
+                    group.add(mesh);
+                    group.userData = { angle: (Math.PI*2/count)*i, speed: 0.02 + Math.random()*0.01, height: 1 + Math.random()*0.5, radius: 2.5 };
+                    scene.add(group);
+                    this.drones.push(group);
+                }
+            }
+
+            update() {
+                // Orbit
+                this.drones.forEach(d => {
+                    d.userData.angle += d.userData.speed;
+                    d.position.x = Math.cos(d.userData.angle) * d.userData.radius;
+                    d.position.z = Math.sin(d.userData.angle) * d.userData.radius;
+                    d.position.y = Math.sin(Date.now()*0.001 + d.userData.angle) * 0.5 + d.userData.height;
+                    d.lookAt(0,0,0);
+                });
+
+                // Shoot Logic
+                if(Date.now() - this.lastShot > 500 && !gameState.isComplete && dirtMesh) {
+                    this.drones.forEach(d => {
+                        this.raycaster.set(d.position, new THREE.Vector3().subVectors(new THREE.Vector3(0,0,0), d.position).normalize());
+                        const intersects = [];
+                        dirtMesh.traverse(c => { if(c.isMesh) { const h = this.raycaster.intersectObject(c); if(h.length>0) intersects.push(h[0]); }});
+                        
+                        if(intersects.length > 0 && intersects[0].uv) {
+                            paint(intersects[0].uv); // Paint small
+                            
+                            // Laser visual
+                            const laserGeo = new THREE.BufferGeometry().setFromPoints([d.position, intersects[0].point]);
+                            const laser = new THREE.Line(laserGeo, new THREE.LineBasicMaterial({color: 0x00ff00, transparent: true}));
+                            scene.add(laser);
+                            setTimeout(() => scene.remove(laser), 50);
+                            sfx('drone');
+                        }
+                    });
+                    this.lastShot = Date.now();
+                }
+            }
+        }
+        const droneSys = new DroneSystem();
+
+        // --- GAME LOGIC ---
+        let artifactGroup, dirtMesh, dirtCanvas, dirtCtx, dirtTex;
+        const TEX_SIZE = 1024;
+
+        function initDirt() {
+            if(!dirtCanvas) { dirtCanvas=document.createElement('canvas'); dirtCanvas.width=dirtCanvas.height=TEX_SIZE; dirtCtx=dirtCanvas.getContext('2d'); }
+            dirtCtx.globalCompositeOperation='source-over'; dirtCtx.fillStyle='#fff'; dirtCtx.fillRect(0,0,TEX_SIZE,TEX_SIZE);
+            for(let i=0; i<1500; i++){
+                dirtCtx.beginPath(); dirtCtx.arc(Math.random()*TEX_SIZE, Math.random()*TEX_SIZE, Math.random()*40+5, 0, 6.28);
+                dirtCtx.fillStyle=`rgba(80,60,50,${Math.random()*0.6})`; dirtCtx.fill();
+            }
+            if(dirtTex) dirtTex.dispose(); dirtTex = new THREE.CanvasTexture(dirtCanvas);
+        }
+
+        function generateArtifact() {
+            if(artifactGroup) scene.remove(artifactGroup);
+            initDirt();
+            gameState.cleanedPercentage=0; gameState.isComplete=false; gameState.combo=1.0; gameState.novaCharge=0;
+            document.getElementById('action-btn').style.display='none';
+            document.getElementById('glitch-msg').style.display='none';
+            document.getElementById('nova-container').style.display='none';
+            
+            // Glitch Chance
+            const isGlitch = Math.random() > 0.95;
+            let color = isGlitch ? 0xff0000 : 0x00ffff;
+            let scale = isGlitch ? 1.5 : 1.0;
+            if(isGlitch) { document.getElementById('glitch-msg').style.display='block'; sfx('glitch'); }
+
+            const valueBase = CONFIG.baseValue * (gameState.rankIdx + 1);
+            gameState.currentArtifact = { isGlitch, value: valueBase * (isGlitch ? 20 : 1) * gameState.valueLevel };
+
+            artifactGroup = new THREE.Group();
+            const shapes = ['box', 'cylinder', 'dodeca', 'torus'];
+            const shape = shapes[Math.floor(Math.random()*shapes.length)];
+            let geo;
+            if(shape==='box') geo = new THREE.BoxGeometry(1.3,1.3,1.3);
+            else if(shape==='cylinder') geo = new THREE.CylinderGeometry(0.5,0.5,1.8,32);
+            else if(shape==='torus') geo = new THREE.TorusKnotGeometry(0.5,0.2,100,16);
+            else geo = new THREE.DodecahedronGeometry(1);
+
+            const coreMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2, metalness: 1.0, emissive: color, emissiveIntensity: isGlitch ? 2 : 0.5 });
+            const core = new THREE.Mesh(geo, coreMat); artifactGroup.add(core);
+
+            const dMat = new THREE.MeshBasicMaterial({color:0xffffff, wireframe:true, transparent:true, opacity:0.05});
+            const wire = new THREE.Mesh(geo, dMat); wire.scale.setScalar(1.02); artifactGroup.add(wire);
+
+            const dirtMat = new THREE.MeshStandardMaterial({ color: 0x4a3b2a, roughness: 1, alphaMap: dirtTex, transparent: true, side: THREE.DoubleSide });
+            const dirtGroup = new THREE.Group();
+            const dMesh = new THREE.Mesh(geo, dirtMat); dMesh.scale.setScalar(1.01);
+            dirtGroup.add(dMesh);
+            dirtMesh = dirtGroup; artifactGroup.add(dirtGroup);
+
+            artifactGroup.scale.setScalar(scale);
+            scene.add(artifactGroup);
+            
+            droneSys.spawn(gameState.droneLevel);
+            updateUI();
+        }
+
+        // --- INPUT ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function spawnFloatText(x, y, txt, col, size=1.5) {
+            const el = document.createElement('div'); el.className = 'floating-txt'; el.innerText = txt;
+            el.style.left = x+'px'; el.style.top = y+'px'; el.style.color = col; el.style.fontSize = size+'rem';
+            document.body.appendChild(el); setTimeout(()=>el.remove(), 800);
+        }
+
+        function handleInput(x, y) {
+            if(gameState.isComplete) return;
+            mouse.x = (x/window.innerWidth)*2-1; mouse.y = -(y/window.innerHeight)*2+1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = [];
+            dirtMesh.traverse(c => { if(c.isMesh) { const h = raycaster.intersectObject(c); if(h.length>0) intersects.push(h[0]); }});
+            
+            if(intersects.length > 0 && intersects[0].uv) {
+                const hit = intersects[0];
+                paint(hit.uv);
+                spawnSpark(hit.point);
+                
+                // Physics
+                artifactGroup.rotation.x += mouse.y * 0.05; artifactGroup.rotation.y += mouse.x * 0.05;
+                setSound(true, gameState.combo);
+
+                const now = Date.now();
+                if(now - gameState.lastCleanTime < 250) gameState.combo = Math.min(gameState.combo + 0.1, 10.0);
+                else gameState.combo = 1.0;
+                gameState.lastCleanTime = now;
+                updateComboUI();
+            } else {
+                setSound(false); gameState.combo = 1.0; updateComboUI();
+            }
+            updateUI();
+        }
+
+        function paint(uv, isNova = false) {
+            dirtCtx.globalCompositeOperation = 'destination-out';
+            dirtCtx.beginPath();
+            let size = CONFIG.baseBrushSize * (1 + (gameState.toolLevel-1)*0.05) * (1 + (gameState.combo*0.1));
+            if(isNova) size = 500; // HUGE
+
+            dirtCtx.arc(uv.x*TEX_SIZE, (1-uv.y)*TEX_SIZE, size*TEX_SIZE, 0, 6.28); dirtCtx.fill();
+            dirtTex.needsUpdate = true;
+            
+            gameState.cleanedPercentage += (0.3 * gameState.toolLevel * gameState.combo) * (isNova ? 10 : 1);
+            if(gameState.cleanedPercentage > 100) gameState.cleanedPercentage = 100;
+
+            // Nova Charge
+            if(!isNova && gameState.novaCharge < 100) {
+                gameState.novaCharge += 0.5;
+                if(gameState.novaCharge >= 100) {
+                    gameState.novaCharge = 100;
+                    document.getElementById('nova-container').style.display = 'flex';
+                }
+                document.getElementById('nova-bar').style.width = gameState.novaCharge + '%';
+            }
+
+            checkCompletion();
+        }
+
+        function triggerNova() {
+            sfx('nova');
+            gameState.shake = 1.0;
+            rgbShift.uniforms['amount'].value = 0.03; // Chromatic impact
+            spawnFloatText(window.innerWidth/2, window.innerHeight/2, "NOVA BLAST!", "#00ffff", 4);
+            
+            // Clean huge chunk
+            paint({x:0.5, y:0.5}, true);
+            
+            gameState.novaCharge = 0;
+            document.getElementById('nova-bar').style.width = '0%';
+            document.getElementById('nova-container').style.display = 'none';
+        }
+
+        function checkCompletion() {
+            if(gameState.cleanedPercentage >= CONFIG.cleanThreshold && !gameState.isComplete) completeLevel();
+        }
+
+        // --- VISUALS ---
+        const particles = [];
+        const pMat = new THREE.SpriteMaterial({map: new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/sprites/spark1.png'), color: 0x00ffff, blending: THREE.AdditiveBlending});
+        
+        function spawnSpark(pos) {
+            const p = new THREE.Sprite(pMat.clone());
+            p.position.copy(pos); p.scale.setScalar(0.2);
+            p.userData = { vel: new THREE.Vector3((Math.random()-0.5)*0.1, (Math.random()-0.5)*0.1, (Math.random()-0.5)*0.1), life: 1.0 };
+            scene.add(p); particles.push(p);
+        }
+
+        // Trail Logic
+        const trailPoints = [];
+        const trailGeo = new THREE.BufferGeometry();
+        const trailMat = new THREE.LineBasicMaterial({ color: 0x00ffff, opacity: 0.5, transparent: true });
+        const trailMesh = new THREE.Line(trailGeo, trailMat);
+        scene.add(trailMesh);
+
+        function updateTrail(x, y) {
+            const vec = new THREE.Vector3();
+            const pos = new THREE.Vector3();
+            vec.set((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1, 0.5);
+            vec.unproject(camera);
+            vec.sub(camera.position).normalize();
+            const distance = -camera.position.z / vec.z;
+            pos.copy(camera.position).add(vec.multiplyScalar(distance * 1.5)); // Project in front of cam
+
+            trailPoints.push(pos);
+            if(trailPoints.length > 20) trailPoints.shift();
+            trailGeo.setFromPoints(trailPoints);
+        }
+        
+        function spawnCashRain() {
+            for(let i=0; i<15; i++) {
+                const el = document.createElement('i');
+                el.className = 'fas fa-gem cash-particle';
+                el.style.left = (Math.random() * window.innerWidth) + 'px';
+                el.style.top = (Math.random() * window.innerHeight * 0.5) + 'px';
+                document.body.appendChild(el);
+                setTimeout(()=>el.remove(), 1000);
+            }
+        }
+
+        function updateParticles() {
+            for(let i=particles.length-1; i>=0; i--) {
+                let p = particles[i]; p.position.add(p.userData.vel); p.material.opacity = p.userData.life; p.userData.life -= 0.05;
+                if(p.userData.life<=0){scene.remove(p); particles.splice(i,1);}
+            }
+            // Aberration decay
+            if(rgbShift.uniforms['amount'].value > 0) rgbShift.uniforms['amount'].value *= 0.9;
+        }
+
+        function updateComboUI() {
+            const box = document.getElementById('combo-box');
+            if(gameState.combo > 1.5) {
+                box.style.opacity = 1; document.getElementById('combo-val').innerText = 'x'+gameState.combo.toFixed(1);
+                box.style.transform = `translateX(-50%) scale(${1 + (gameState.combo*0.1)})`;
+            } else box.style.opacity = 0;
+        }
+
+        function completeLevel() {
+            gameState.isComplete = true;
+            setSound(false); sfx('win');
+            
+            document.getElementById('action-btn').style.display = 'block';
+            document.getElementById('prog-bar').style.background = '#00ff00'; document.getElementById('prog-bar').style.boxShadow = '0 0 30px #00ff00';
+            document.getElementById('prog-text').innerText = "100% PURE"; document.getElementById('prog-text').style.color = "#00ff00";
+            
+            dirtCtx.globalCompositeOperation = 'destination-out'; dirtCtx.fillRect(0,0,TEX_SIZE,TEX_SIZE); dirtTex.needsUpdate = true;
+        }
+
+        function gainXP(amount) {
+            gameState.xp += amount;
+            const rank = CONFIG.ranks[gameState.rankIdx];
+            if(gameState.xp >= rank.max && gameState.rankIdx < CONFIG.ranks.length - 1) {
+                gameState.rankIdx++; gameState.xp = 0;
+                spawnFloatText(window.innerWidth/2, window.innerHeight/2, "RANK UP!", "#ffd700", 4); sfx('win');
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            const pct = Math.min(100, Math.floor(gameState.cleanedPercentage));
+            document.getElementById('prog-bar').style.width = pct+'%';
+            if(!gameState.isComplete) document.getElementById('prog-text').innerText = `INTEGRITY: ${pct}%`;
+
+            document.getElementById('score').innerText = Math.floor(gameState.credits);
+            
+            const rank = CONFIG.ranks[gameState.rankIdx];
+            document.getElementById('rank-name').innerText = rank.name;
+            const xpPct = Math.floor((gameState.xp / rank.max) * 100);
+            document.getElementById('xp-bar').style.width = xpPct + '%';
+
+            document.getElementById('lvl-tool').innerText = gameState.toolLevel;
+            document.getElementById('lvl-value').innerText = gameState.valueLevel;
+            document.getElementById('lvl-drone').innerText = gameState.droneLevel;
+            document.getElementById('cost-tool').innerText = gameState.toolCost;
+            document.getElementById('cost-value').innerText = gameState.valueCost;
+            document.getElementById('cost-drone').innerText = gameState.droneCost;
+            
+            document.getElementById('sell-val').innerText = Math.floor(gameState.currentArtifact.value);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            grid.children.forEach(l => { if(l.userData.z !== undefined) { l.position.z += 0.05; if(l.position.z > 50) l.position.z = -30; } });
+
+            if(gameState.hasStarted && artifactGroup) {
+                droneSys.update();
+                if(gameState.isComplete) artifactGroup.rotation.y += 0.05;
+                else artifactGroup.rotation.y += 0.002;
+
+                if(gameState.shake > 0) {
+                    camera.position.x = (Math.random()-0.5)*gameState.shake; camera.position.y = 1.8 + (Math.random()-0.5)*gameState.shake;
+                    gameState.shake *= CONFIG.cameraShakeDecay;
+                }
+            }
+            updateParticles(); composer.render();
+        }
+
+        window.startGame = function() {
+            document.getElementById('start-screen').style.display='none';
+            audioCtx.resume(); initAudio(); gameState.hasStarted = true; generateArtifact(); animate();
+        }
+
+        window.addEventListener('mousemove', e => { 
+            if(gameState.hasStarted) updateTrail(e.clientX, e.clientY);
+            if(e.buttons===1 && gameState.hasStarted) handleInput(e.clientX, e.clientY); 
+        });
+        window.addEventListener('touchmove', e => { if(gameState.hasStarted) handleInput(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+        window.addEventListener('mouseup', () => { setSound(false); gameState.combo=1; updateComboUI(); });
+        window.addEventListener('touchend', () => { setSound(false); gameState.combo=1; updateComboUI(); });
+
+        document.getElementById('btn-upgrade-tool').onclick = () => {
+            if(gameState.credits >= gameState.toolCost) {
+                gameState.credits -= gameState.toolCost; gameState.toolLevel++; gameState.toolCost = Math.floor(gameState.toolCost*1.5);
+                sfx('coin'); saveData(); updateUI();
+            }
+        }
+        document.getElementById('btn-upgrade-value').onclick = () => {
+            if(gameState.credits >= gameState.valueCost) {
+                gameState.credits -= gameState.valueCost; gameState.valueLevel++; gameState.valueCost = Math.floor(gameState.valueCost*1.6);
+                sfx('coin'); saveData(); updateUI();
+            }
+        }
+        document.getElementById('btn-upgrade-drone').onclick = () => {
+            if(gameState.credits >= gameState.droneCost) {
+                gameState.credits -= gameState.droneCost; gameState.droneLevel++; gameState.droneCost = Math.floor(gameState.droneCost*1.8);
+                droneSys.spawn(gameState.droneLevel);
+                sfx('coin'); saveData(); updateUI();
+            }
+        }
+
+        document.getElementById('nova-container').onclick = triggerNova;
+
+        document.getElementById('action-btn').onclick = () => {
+            const val = Math.floor(gameState.currentArtifact.value * gameState.combo);
+            gameState.credits += val; gainXP(val * 0.1); sfx('coin'); spawnCashRain();
+            document.getElementById('credits-container').style.transform = 'scale(1.2)';
+            setTimeout(() => document.getElementById('credits-container').style.transform = 'scale(1)', 100);
+            saveData(); generateArtifact();
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight); composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>
