@@ -4,6 +4,8 @@
 Moteur : Three.js + WebGL + Web Audio API
 Genre : Simulation / ASMR / Idle Tycoon
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/SamirStream/cyberscrapper)
+
 📋 Description du Projet
 
 Cyber-Scrapper est un jeu de simulation de restauration d'artefacts futuristes. Le joueur incarne un "Scrapper" qui doit nettoyer, réparer et revendre des objets technologiques trouvés dans les décharges numériques. Le jeu mélange la satisfaction immédiate du nettoyage (ASMR visuel et sonore) avec une boucle de progression addictive (Tycoon, Rangs, Automatisation).
